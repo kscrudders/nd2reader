@@ -7,6 +7,15 @@ end
 FileID = libpointer('voidPtr', [int8(FileName) 0]);
 [FilePointer] = calllib('Nd2ReadSdk', 'Lim_FileOpenForReadUtf8', FileID);
 
+if FilePointer.isNull
+    error('SeqInfo:CannotOpenFile', ...
+        ['Lim_FileOpenForReadUtf8 could not open "%s". Check that the file exists, ', ...
+        'is a readable ND2 file, and is not locked by another program.'], FileName);
+end
+
+% Close the file however this function exits.
+CloseOnExit = onCleanup(@() ND2Close(FilePointer));
+
 FrameMetadata = calllib('Nd2ReadSdk', 'Lim_FileGetFrameMetadata', FilePointer,0);
 FrameMetadataJson = ND2ReadString(FrameMetadata, 'uint8Ptr');
 FrameMetadataStru=jsondecode(FrameMetadataJson);
@@ -53,8 +62,8 @@ for i=1:size(Num,2)
     
 end
 
-ND2Close(FilePointer)
-clear('FilePointer')
+% CloseOnExit calls ND2Close(FilePointer) here. Do not add an explicit
+% ND2Close as well; closing the same handle twice is undefined behaviour.
 
 end
 

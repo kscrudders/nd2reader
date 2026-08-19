@@ -9,11 +9,10 @@ function [FilePointer, ImagePointer, ImageReadOut] = ND2Open(FileName)
     [FilePointer] = calllib('Nd2ReadSdk', 'Lim_FileOpenForReadUtf8', FileID);
 %     CoordSize = calllib('Nd2ReadSdk', 'Lim_FileGetCoordSize', FilePointer);
 %     numImages = calllib('Nd2ReadSdk', 'Lim_FileGetSeqCount', FilePointer);
+    % The attributes JSON is only a couple of hundred bytes, so the fixed
+    % 500-byte read ran off the end of the SDK allocation on every call.
     Attibutes = calllib('Nd2ReadSdk', 'Lim_FileGetAttributes', FilePointer);
-    setdatatype(Attibutes, 'uint8Ptr', 500)
-    AttibutesValue = Attibutes.Value';
-    Attibuteslength = find(AttibutesValue == 0, 1);
-    AttibutesJson = char(AttibutesValue(1:Attibuteslength - 1));
+    AttibutesJson = ND2ReadString(Attibutes, 'uint8Ptr');
     AttibutesStru = jsondecode(AttibutesJson);
 
     % Metadata = calllib('Nd2ReadSdk','Lim_FileGetMetadata',FilePointer);

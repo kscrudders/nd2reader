@@ -103,8 +103,7 @@ function [ImageInfo] = CheckInfo(ImageInfo)
 
     else
 
-        for i = 1:size(DimensionsStruct, 2)
-
+        for i = 1:min([size(ExperimentStru,2) size(DimensionsStruct, 2)]) % If you remove xy dimension from then Experiment # mismatchs Dimension # KLS_20240801
             if contains(ExperimentStru(i).type, DimensionsStruct(i).name)
             else
                 warning('%s\n%s',['Loop name not match in loop ', num2str(i), ', name ', ExperimentStru(i).type, ' vs ', DimensionsStruct(i).name, 'Loop.'], 'Set loops infomation with ImageInfo.description');

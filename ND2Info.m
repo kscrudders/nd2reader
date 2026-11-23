@@ -28,12 +28,12 @@ CoordSize = calllib('Nd2ReadSdk', 'Lim_FileGetCoordSize', FilePointer);
 % Description(Description == 0) = ' ' already compensates for.
 Attributes = calllib('Nd2ReadSdk', 'Lim_FileGetAttributes', FilePointer);
 AttributesJson = ND2ReadString(Attributes, 'int8Ptr');
-ND2FreeString(Attributes, 'int8Ptr');
+ND2FreeString(Attributes);
 AttributesStru = jsondecode(AttributesJson);
 
 TextInfo = calllib('Nd2ReadSdk', 'Lim_FileGetTextinfo', FilePointer);
 TextInfoJson = ND2ReadString(TextInfo, 'int8Ptr');
-ND2FreeString(TextInfo, 'int8Ptr');
+ND2FreeString(TextInfo);
 TextInfoStru = jsondecode(TextInfoJson);
 
 Metadata = calllib('Nd2ReadSdk', 'Lim_FileGetMetadata', FilePointer);
@@ -42,7 +42,7 @@ if Metadata.isNull
     MetadataStru=[];
 else
     MetadataJson = ND2ReadString(Metadata, 'int8Ptr');
-    ND2FreeString(Metadata, 'int8Ptr');
+    ND2FreeString(Metadata);
     MetadataStru = jsondecode(MetadataJson);
     
 end
@@ -54,7 +54,7 @@ if Experiment.isNull
     NumInCoord=[];
 else
     ExperimentJson = ND2ReadString(Experiment, 'int8Ptr');
-    ND2FreeString(Experiment, 'int8Ptr');
+    ND2FreeString(Experiment);
     ExperimentStru=jsondecode(ExperimentJson);
     
     

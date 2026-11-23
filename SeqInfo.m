@@ -22,7 +22,7 @@ FrameMetadataStru=jsondecode(FrameMetadataJson);
 
 % The free was itself an overrun: re-declaring the string as 'voidPtr' with the
 % same element count made calllib marshal eight bytes per element.
-ND2FreeString(FrameMetadata, 'uint8Ptr');
+ND2FreeString(FrameMetadata);
 
 if FrameMetadataStru.contents.channelCount==1
     SeqTime=zeros(size(Num,2),1);
@@ -45,7 +45,7 @@ for i=1:size(Num,2)
     FrameMetadata = calllib('Nd2ReadSdk', 'Lim_FileGetFrameMetadata', FilePointer,Num(i)-1);
     FrameMetadataJson = ND2ReadString(FrameMetadata, 'uint8Ptr');
     FrameMetadataStru=jsondecode(FrameMetadataJson);
-    ND2FreeString(FrameMetadata, 'uint8Ptr');
+    ND2FreeString(FrameMetadata);
  
     if FrameMetadataStru.contents.channelCount==1
         SeqTime(i)=FrameMetadataStru.channels.time.relativeTimeMs;

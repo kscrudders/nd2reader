@@ -19,7 +19,7 @@ function [FilePointer, ImagePointer, ImageReadOut] = ND2Open(FileName)
     % 500-byte read ran off the end of the SDK allocation on every call.
     Attibutes = calllib('Nd2ReadSdk', 'Lim_FileGetAttributes', FilePointer);
     AttibutesJson = ND2ReadString(Attibutes, 'uint8Ptr');
-    ND2FreeString(Attibutes, 'uint8Ptr');
+    ND2FreeString(Attibutes);
     AttibutesStru = jsondecode(AttibutesJson);
 
     % Metadata = calllib('Nd2ReadSdk','Lim_FileGetMetadata',FilePointer);

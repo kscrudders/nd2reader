@@ -8,20 +8,12 @@ FileID = libpointer('voidPtr', [int8(FileName) 0]);
 [FilePointer] = calllib('Nd2ReadSdk', 'Lim_FileOpenForReadUtf8', FileID);
 
 FrameMetadata = calllib('Nd2ReadSdk', 'Lim_FileGetFrameMetadata', FilePointer,0);
-TestLength=3000;
-setdatatype(FrameMetadata, 'uint8Ptr', TestLength)
-FrameMetadataValue = FrameMetadata.Value';
-while isempty(find(FrameMetadataValue == 0, 1))
-    TestLength=TestLength*2;
-    setdatatype(FrameMetadata, 'uint8Ptr', TestLength)
-    FrameMetadataValue = FrameMetadata.Value';
-end
-FrameMetadataLength = find(FrameMetadataValue == 0, 1);
-FrameMetadataJson = char(FrameMetadataValue(1:FrameMetadataLength - 1));
+FrameMetadataJson = ND2ReadString(FrameMetadata, 'uint8Ptr');
 FrameMetadataStru=jsondecode(FrameMetadataJson);
 
-setdatatype(FrameMetadata, 'voidPtr', TestLength)
-calllib('Nd2ReadSdk', 'Lim_FileFreeString', FrameMetadata);
+% The free was itself an overrun: re-declaring the string as 'voidPtr' with the
+% same element count made calllib marshal eight bytes per element.
+ND2FreeString(FrameMetadata);
 
 if FrameMetadataStru.contents.channelCount==1
     SeqTime=zeros(size(Num,2),1);
@@ -38,14 +30,13 @@ end
 
 for i=1:size(Num,2)
     
+    % This loop also reused TestLength from the frame 0 probe above, so a frame
+    % whose metadata was longer produced an empty index and an error out of
+    % jsondecode. Finding the terminator per frame removes that too.
     FrameMetadata = calllib('Nd2ReadSdk', 'Lim_FileGetFrameMetadata', FilePointer,Num(i)-1);
-    setdatatype(FrameMetadata, 'uint8Ptr', TestLength)
-    FrameMetadataValue = FrameMetadata.Value';
-    FrameMetadataLength = find(FrameMetadataValue == 0, 1);
-    FrameMetadataJson = char(FrameMetadataValue(1:FrameMetadataLength - 1));
+    FrameMetadataJson = ND2ReadString(FrameMetadata, 'uint8Ptr');
     FrameMetadataStru=jsondecode(FrameMetadataJson);
-    setdatatype(FrameMetadata, 'voidPtr', TestLength)
-    calllib('Nd2ReadSdk', 'Lim_FileFreeString', FrameMetadata);
+    ND2FreeString(FrameMetadata);
  
     if FrameMetadataStru.contents.channelCount==1
         SeqTime(i)=FrameMetadataStru.channels.time.relativeTimeMs;
